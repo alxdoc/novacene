@@ -1,0 +1,14 @@
+sentence-transformers
+llama-index-embeddings-huggingface
+transformers 
+optimum
+llama-index-embeddings-huggingface-optimum
+
+llama-index-core
+
+llama-index-readers-file
+llama-index-llms-ollama
+llama-index-llms-groq
+
+llama-index-readers-wikipedia
+wikipedia
