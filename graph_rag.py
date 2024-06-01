@@ -5,6 +5,11 @@ from llama_index.core.graph_stores import SimpleGraphStore
 from llama_index.core import StorageContext
 from llama_index.core.retrievers import KnowledgeGraphRAGRetriever
 from llama_index.core.query_engine import RetrieverQueryEngine
+from llama_index.core.response_synthesizers import get_response_synthesizer
+from llama_index.core.query_engine.retriever_query_engine import RetrieverQueryEngine
+from llama_index.core.retrievers import VectorIndexRetriever
+from llama_index.core.retrievers import KGTableRetriever
+
 
 
 from llama_index.llms.ollama import Ollama
@@ -13,6 +18,8 @@ from llama_index.llms.groq import Groq
 from llama_index.core import Settings
 
 from llama_index.embeddings.huggingface_optimum import OptimumEmbedding
+
+from novacene_retriever import NovaceneRetriever
 
 #Будем использовать отимизированную onnix модель e5-base-en-ru или есть -large вариант, так же есть эмбединги от банка Точка - чуть лучше
 # чтобы сконвертировать в onnix раскомментируйте эти строки, появится папка с моделью и тогда надо обратно закомментировать
@@ -70,19 +77,18 @@ kg_index = KnowledgeGraphIndex.from_documents(
 #    tags=tags,
 #)
 
-graph_rag_retriever = KnowledgeGraphRAGRetriever(
-    storage_context=storage_context,
-    #service_context=service_context,
-    llm=llm,
-    verbose=True,
+# create custom retriever
+vector_retriever = VectorIndexRetriever(index=vector_index)
+kg_retriever = KGTableRetriever(index=kg_index, retriever_mode='keyword', include_text=False)
+novacene_retriever = NovaceneRetriever(vector_retriever, kg_retriever)
+
+response_synthesizer = get_response_synthesizer(response_mode="tree_summarize",)
+custom_query_engine = RetrieverQueryEngine(
+    retriever=novacene_retriever,
+    response_synthesizer=response_synthesizer,
 )
 
-query_engine = RetrieverQueryEngine.from_args(
-    graph_rag_retriever, 
-    #service_context=service_context
-)
-
-response = query_engine.query(
+response = custom_query_engine.query(
     "Tell me more about Russia. Answer only in Russian.",
 )
 

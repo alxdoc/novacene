@@ -1,5 +1,6 @@
 sentence-transformers
 llama-index-embeddings-huggingface
+llama-index-vector-stores-qdrant
 transformers 
 optimum
 llama-index-embeddings-huggingface-optimum
